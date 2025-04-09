@@ -6,6 +6,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Http;
+using WebApplication1.Services;
 
 namespace WebApplication1.Controllers
 {
@@ -15,20 +17,29 @@ namespace WebApplication1.Controllers
     {
         private readonly BeautyShopDbContext _dbContext;
         private readonly IConfiguration _config;
+        private readonly AzureBlobStorageService _blobStorageService;
 
-        public AuthController(BeautyShopDbContext dbContext, IConfiguration config)
+        public AuthController(BeautyShopDbContext dbContext, IConfiguration config, AzureBlobStorageService blobStorageService)
         {
             _dbContext = dbContext;
             _config = config;
+            _blobStorageService = blobStorageService;
         }
 
-        // ✅ REGISTER USER
+        // ✅ REGISTER USER WITH EXTENDED ATTRIBUTES AND BLOB SUPPORT
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromForm] RegisterRequest request)
         {
             if (_dbContext.Users.Any(u => u.Email == request.Email))
             {
                 return BadRequest(new { message = "Email already exists." });
+            }
+
+            // Use the URL provided or upload the file if one was submitted.
+            string profilePictureUrl = request.ProfilePictureUrl;
+            if (request.ProfilePictureFile != null && request.ProfilePictureFile.Length > 0)
+            {
+                profilePictureUrl = await _blobStorageService.UploadFileAsync(request.ProfilePictureFile);
             }
 
             var user = new User
@@ -37,12 +48,23 @@ namespace WebApplication1.Controllers
                 PasswordHash = HashPassword(request.Password),
                 FullName = request.FullName,
                 PhoneNumber = request.PhoneNumber,
-                ProfilePictureUrl = request.ProfilePictureUrl,
+                ProfilePictureUrl = profilePictureUrl,
                 LanguagePreference = request.LanguagePreference,
                 Location = request.Location,
                 AccountStatus = "Active", // Default status
-                Role = request.Role ?? "Client", // Default role
-                DateCreated = DateTime.UtcNow
+                Role = string.IsNullOrEmpty(request.Role) ? "Client" : request.Role,
+                DateCreated = DateTime.UtcNow,
+
+                // Extended stylist properties (optional)
+                Bio = request.Bio,
+                YearsOfExperience = request.YearsOfExperience,
+                PortfolioUrl = request.PortfolioUrl,
+                AvailableWorkingHours = request.AvailableWorkingHours,
+                TravelRadius = request.TravelRadius,
+                BusinessLocation = request.BusinessLocation,
+                CancellationPolicy = request.CancellationPolicy,
+                PaymentDetails = request.PaymentDetails,
+                Certifications = request.Certifications
             };
 
             _dbContext.Users.Add(user);
@@ -58,38 +80,59 @@ namespace WebApplication1.Controllers
             public string Password { get; set; }
             public string? FullName { get; set; }
             public string? PhoneNumber { get; set; }
+            // Fallback URL if no file is provided.
             public string? ProfilePictureUrl { get; set; }
+            // File upload for profile picture
+            public IFormFile? ProfilePictureFile { get; set; }
             public string? LanguagePreference { get; set; }
             public string? Location { get; set; }
-            public string? Role { get; set; } // Optional
+            public string? Role { get; set; }
+
+            // Extended stylist properties (optional)
+            public string? Bio { get; set; }
+            public int? YearsOfExperience { get; set; }
+            public string? PortfolioUrl { get; set; }
+            public string? AvailableWorkingHours { get; set; }
+            public decimal? TravelRadius { get; set; }
+            public string? BusinessLocation { get; set; }
+            public string? CancellationPolicy { get; set; }
+            public string? PaymentDetails { get; set; }
+            public string? Certifications { get; set; }
         }
 
-
+        // ✅ LOGIN ENDPOINT (unchanged)
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-
-            if (user == null || user.PasswordHash != HashPassword(request.Password))
+            try
             {
-                return Unauthorized(new { message = "Invalid email or password." });
-            }
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+                if (user == null || user.PasswordHash != HashPassword(request.Password))
+                {
+                    return Unauthorized(new { message = "Invalid email or password." });
+                }
 
-            string token = GenerateJwtToken(user);
-            return Ok(new { token });
+                string token = GenerateJwtToken(user);
+                return Ok(new { token });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Login error: " + ex.Message);
+                return StatusCode(500, new { message = "An error occurred during login." });
+            }
         }
 
-        // DTO for login request
+        // DTO for Login Request
         public class LoginRequest
         {
             public string Email { get; set; }
             public string Password { get; set; }
         }
 
-        // ✅ UPDATE USER DETAILS
-        [Authorize] // Requires authentication
+        // ✅ UPDATE USER DETAILS WITH OPTIONAL EXTENDED ATTRIBUTES AND BLOB UPLOAD
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] User updatedUser)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateUser(int id, [FromForm] UpdateUserDto updatedUser)
         {
             var user = await _dbContext.Users.FindAsync(id);
             if (user == null)
@@ -97,36 +140,66 @@ namespace WebApplication1.Controllers
                 return NotFound(new { message = "User not found." });
             }
 
-            // Only update non-null fields
-            user.FullName = updatedUser.FullName ?? user.FullName;
-            user.PhoneNumber = updatedUser.PhoneNumber ?? user.PhoneNumber;
-            user.ProfilePictureUrl = updatedUser.ProfilePictureUrl ?? user.ProfilePictureUrl;
-            user.LanguagePreference = updatedUser.LanguagePreference ?? user.LanguagePreference;
-            user.Location = updatedUser.Location ?? user.Location;
-            user.AccountStatus = updatedUser.AccountStatus ?? user.AccountStatus;
+            // Update base user fields
+            user.FullName = !string.IsNullOrEmpty(updatedUser.FullName) ? updatedUser.FullName : user.FullName;
+            user.PhoneNumber = !string.IsNullOrEmpty(updatedUser.PhoneNumber) ? updatedUser.PhoneNumber : user.PhoneNumber;
 
-            // Hash password only if it's changed
-            if (!string.IsNullOrWhiteSpace(updatedUser.PasswordHash))
+            // Update profile picture: if a file is provided, upload it; otherwise, use the provided URL if any.
+            if (updatedUser.ProfilePictureFile != null && updatedUser.ProfilePictureFile.Length > 0)
             {
-                user.PasswordHash = HashPassword(updatedUser.PasswordHash);
+                user.ProfilePictureUrl = await _blobStorageService.UploadFileAsync(updatedUser.ProfilePictureFile);
             }
+            else if (!string.IsNullOrEmpty(updatedUser.ProfilePictureUrl))
+            {
+                user.ProfilePictureUrl = updatedUser.ProfilePictureUrl;
+            }
+
+            user.LanguagePreference = !string.IsNullOrEmpty(updatedUser.LanguagePreference) ? updatedUser.LanguagePreference : user.LanguagePreference;
+            user.Location = !string.IsNullOrEmpty(updatedUser.Location) ? updatedUser.Location : user.Location;
+            user.AccountStatus = !string.IsNullOrEmpty(updatedUser.AccountStatus) ? updatedUser.AccountStatus : user.AccountStatus;
+
+            if (!string.IsNullOrWhiteSpace(updatedUser.Password))
+            {
+                user.PasswordHash = HashPassword(updatedUser.Password);
+            }
+
+            // Update extended stylist fields if provided
+            user.Bio = !string.IsNullOrEmpty(updatedUser.Bio) ? updatedUser.Bio : user.Bio;
+            user.YearsOfExperience = updatedUser.YearsOfExperience.HasValue ? updatedUser.YearsOfExperience : user.YearsOfExperience;
+            user.PortfolioUrl = !string.IsNullOrEmpty(updatedUser.PortfolioUrl) ? updatedUser.PortfolioUrl : user.PortfolioUrl;
+            user.AvailableWorkingHours = !string.IsNullOrEmpty(updatedUser.AvailableWorkingHours) ? updatedUser.AvailableWorkingHours : user.AvailableWorkingHours;
+            user.TravelRadius = updatedUser.TravelRadius.HasValue ? updatedUser.TravelRadius : user.TravelRadius;
+            user.BusinessLocation = !string.IsNullOrEmpty(updatedUser.BusinessLocation) ? updatedUser.BusinessLocation : user.BusinessLocation;
+            user.CancellationPolicy = !string.IsNullOrEmpty(updatedUser.CancellationPolicy) ? updatedUser.CancellationPolicy : user.CancellationPolicy;
+            user.PaymentDetails = !string.IsNullOrEmpty(updatedUser.PaymentDetails) ? updatedUser.PaymentDetails : user.PaymentDetails;
+            user.Certifications = !string.IsNullOrEmpty(updatedUser.Certifications) ? updatedUser.Certifications : user.Certifications;
 
             await _dbContext.SaveChangesAsync();
             return Ok(new { message = "User updated successfully." });
         }
 
-        // ✅ GET LOGGED-IN USER DETAILS (Using JWT)
-        [Authorize]
-        [HttpGet("user")]
-        public async Task<IActionResult> GetUserByToken()
+        // DTO for Updating User Details
+        public class UpdateUserDto
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return Unauthorized(new { message = "Invalid token" });
+            public string? FullName { get; set; }
+            public string? PhoneNumber { get; set; }
+            public string? ProfilePictureUrl { get; set; }
+            public IFormFile? ProfilePictureFile { get; set; }
+            public string? AccountStatus { get; set; }
+            public string? LanguagePreference { get; set; }
+            public string? Location { get; set; }
+            public string? Password { get; set; } // Optional; update only if provided
 
-            var user = await _dbContext.Users.FindAsync(int.Parse(userId));
-            if (user == null) return NotFound(new { message = "User not found" });
-
-            return Ok(user);
+            // Extended stylist properties (optional)
+            public string? Bio { get; set; }
+            public int? YearsOfExperience { get; set; }
+            public string? PortfolioUrl { get; set; }
+            public string? AvailableWorkingHours { get; set; }
+            public decimal? TravelRadius { get; set; }
+            public string? BusinessLocation { get; set; }
+            public string? CancellationPolicy { get; set; }
+            public string? PaymentDetails { get; set; }
+            public string? Certifications { get; set; }
         }
 
         // ✅ DELETE USER BY ID
@@ -142,22 +215,83 @@ namespace WebApplication1.Controllers
 
             _dbContext.Users.Remove(user);
             await _dbContext.SaveChangesAsync();
-
             return Ok(new { message = "User deleted successfully." });
         }
 
-        // ✅ GET USER BY ID
-        [Authorize]
+        // ✅ GET USER BY ID (including extended attributes)
         [HttpGet("user/{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
-            var user = await _dbContext.Users.FindAsync(id);
+            var user = await _dbContext.Users
+                .Where(u => u.Id == id)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.FullName,
+                    u.Email,
+                    u.PhoneNumber,
+                    ProfilePictureUrl = string.IsNullOrEmpty(u.ProfilePictureUrl)
+                        ? null
+                        : _blobStorageService.GetBlobSasUriFromUrl(u.ProfilePictureUrl),
+                    u.LanguagePreference,
+                    u.Location,
+                    u.Role,
+                    u.AccountStatus,
+                    // Extended stylist properties
+                    u.Bio,
+                    u.YearsOfExperience,
+                    u.PortfolioUrl,
+                    u.AvailableWorkingHours,
+                    u.TravelRadius,
+                    u.BusinessLocation,
+                    u.CancellationPolicy,
+                    u.PaymentDetails,
+                    u.Certifications
+                })
+                .FirstOrDefaultAsync();
+
             if (user == null)
             {
                 return NotFound(new { message = "User not found." });
             }
-
             return Ok(user);
+        }
+
+        // ✅ GET USERS BY ROLE (including extended attributes)
+        [HttpGet("users/role/{role}")]
+        public async Task<IActionResult> GetUsersByRole(string role)
+        {
+            var users = await _dbContext.Users
+                .Where(u => u.Role.ToLower() == role.ToLower())
+                .Select(u => new
+                {
+                    u.Id,
+                    u.FullName,
+                    u.Email,
+                    u.PhoneNumber,
+                    u.ProfilePictureUrl,
+                    u.LanguagePreference,
+                    u.Location,
+                    u.Role,
+                    u.AccountStatus,
+                    // Extended stylist properties
+                    u.Bio,
+                    u.YearsOfExperience,
+                    u.PortfolioUrl,
+                    u.AvailableWorkingHours,
+                    u.TravelRadius,
+                    u.BusinessLocation,
+                    u.CancellationPolicy,
+                    u.PaymentDetails,
+                    u.Certifications
+                })
+                .ToListAsync();
+
+            if (users == null || users.Count == 0)
+            {
+                return NotFound(new { message = "No users found with the specified role." });
+            }
+            return Ok(users);
         }
 
         // 🔒 Hash Password using SHA256
@@ -194,10 +328,9 @@ namespace WebApplication1.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-
-
     }
 
+    // DTO for Login Request if defined outside of the controller (optional)
     public class LoginRequest
     {
         public string Email { get; set; }

@@ -12,19 +12,124 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
+                "type": "object",
+                "properties": {
+                  "Email": {
+                    "type": "string"
+                  },
+                  "Password": {
+                    "type": "string"
+                  },
+                  "FullName": {
+                    "type": "string"
+                  },
+                  "PhoneNumber": {
+                    "type": "string"
+                  },
+                  "ProfilePictureUrl": {
+                    "type": "string"
+                  },
+                  "ProfilePictureFile": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "LanguagePreference": {
+                    "type": "string"
+                  },
+                  "Location": {
+                    "type": "string"
+                  },
+                  "Role": {
+                    "type": "string"
+                  },
+                  "Bio": {
+                    "type": "string"
+                  },
+                  "YearsOfExperience": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "PortfolioUrl": {
+                    "type": "string"
+                  },
+                  "AvailableWorkingHours": {
+                    "type": "string"
+                  },
+                  "TravelRadius": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "BusinessLocation": {
+                    "type": "string"
+                  },
+                  "CancellationPolicy": {
+                    "type": "string"
+                  },
+                  "PaymentDetails": {
+                    "type": "string"
+                  },
+                  "Certifications": {
+                    "type": "string"
+                  }
+                }
+              },
+              "encoding": {
+                "Email": {
+                  "style": "form"
+                },
+                "Password": {
+                  "style": "form"
+                },
+                "FullName": {
+                  "style": "form"
+                },
+                "PhoneNumber": {
+                  "style": "form"
+                },
+                "ProfilePictureUrl": {
+                  "style": "form"
+                },
+                "ProfilePictureFile": {
+                  "style": "form"
+                },
+                "LanguagePreference": {
+                  "style": "form"
+                },
+                "Location": {
+                  "style": "form"
+                },
+                "Role": {
+                  "style": "form"
+                },
+                "Bio": {
+                  "style": "form"
+                },
+                "YearsOfExperience": {
+                  "style": "form"
+                },
+                "PortfolioUrl": {
+                  "style": "form"
+                },
+                "AvailableWorkingHours": {
+                  "style": "form"
+                },
+                "TravelRadius": {
+                  "style": "form"
+                },
+                "BusinessLocation": {
+                  "style": "form"
+                },
+                "CancellationPolicy": {
+                  "style": "form"
+                },
+                "PaymentDetails": {
+                  "style": "form"
+                },
+                "Certifications": {
+                  "style": "form"
+                }
               }
             }
           }
@@ -85,35 +190,122 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/User"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
+                "type": "object",
+                "properties": {
+                  "FullName": {
+                    "type": "string"
+                  },
+                  "PhoneNumber": {
+                    "type": "string"
+                  },
+                  "ProfilePictureUrl": {
+                    "type": "string"
+                  },
+                  "ProfilePictureFile": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "AccountStatus": {
+                    "type": "string"
+                  },
+                  "LanguagePreference": {
+                    "type": "string"
+                  },
+                  "Location": {
+                    "type": "string"
+                  },
+                  "Password": {
+                    "type": "string"
+                  },
+                  "Bio": {
+                    "type": "string"
+                  },
+                  "YearsOfExperience": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "PortfolioUrl": {
+                    "type": "string"
+                  },
+                  "AvailableWorkingHours": {
+                    "type": "string"
+                  },
+                  "TravelRadius": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "BusinessLocation": {
+                    "type": "string"
+                  },
+                  "CancellationPolicy": {
+                    "type": "string"
+                  },
+                  "PaymentDetails": {
+                    "type": "string"
+                  },
+                  "Certifications": {
+                    "type": "string"
+                  }
+                }
+              },
+              "encoding": {
+                "FullName": {
+                  "style": "form"
+                },
+                "PhoneNumber": {
+                  "style": "form"
+                },
+                "ProfilePictureUrl": {
+                  "style": "form"
+                },
+                "ProfilePictureFile": {
+                  "style": "form"
+                },
+                "AccountStatus": {
+                  "style": "form"
+                },
+                "LanguagePreference": {
+                  "style": "form"
+                },
+                "Location": {
+                  "style": "form"
+                },
+                "Password": {
+                  "style": "form"
+                },
+                "Bio": {
+                  "style": "form"
+                },
+                "YearsOfExperience": {
+                  "style": "form"
+                },
+                "PortfolioUrl": {
+                  "style": "form"
+                },
+                "AvailableWorkingHours": {
+                  "style": "form"
+                },
+                "TravelRadius": {
+                  "style": "form"
+                },
+                "BusinessLocation": {
+                  "style": "form"
+                },
+                "CancellationPolicy": {
+                  "style": "form"
+                },
+                "PaymentDetails": {
+                  "style": "form"
+                },
+                "Certifications": {
+                  "style": "form"
+                }
               }
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/auth/user": {
-      "get": {
-        "tags": [
-          "Auth"
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -157,6 +349,28 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/users/role/{role}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "name": "role",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -218,105 +432,6 @@
           },
           "password": {
             "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "RegisterRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "password": {
-            "type": "string",
-            "nullable": true
-          },
-          "fullName": {
-            "type": "string",
-            "nullable": true
-          },
-          "phoneNumber": {
-            "type": "string",
-            "nullable": true
-          },
-          "profilePictureUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "languagePreference": {
-            "type": "string",
-            "nullable": true
-          },
-          "location": {
-            "type": "string",
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "User": {
-        "required": [
-          "email",
-          "passwordHash"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "email": {
-            "minLength": 1,
-            "type": "string",
-            "format": "email"
-          },
-          "passwordHash": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "fullName": {
-            "type": "string",
-            "nullable": true
-          },
-          "phoneNumber": {
-            "type": "string",
-            "nullable": true
-          },
-          "profilePictureUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "accountStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "nullable": true
-          },
-          "languagePreference": {
-            "type": "string",
-            "nullable": true
-          },
-          "location": {
-            "type": "string",
-            "nullable": true
-          },
-          "dateCreated": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "lastLogin": {
-            "type": "string",
-            "format": "date-time",
             "nullable": true
           }
         },

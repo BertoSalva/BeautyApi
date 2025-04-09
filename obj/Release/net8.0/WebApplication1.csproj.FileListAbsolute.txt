@@ -141,3 +141,7 @@ C:\Users\CELL STUDIO\Desktop\BeautyAPI\WebApplication1\obj\Release\net8.0\refint
 C:\Users\CELL STUDIO\Desktop\BeautyAPI\WebApplication1\obj\Release\net8.0\WebApplication1.pdb
 C:\Users\CELL STUDIO\Desktop\BeautyAPI\WebApplication1\obj\Release\net8.0\WebApplication1.genruntimeconfig.cache
 C:\Users\CELL STUDIO\Desktop\BeautyAPI\WebApplication1\obj\Release\net8.0\ref\WebApplication1.dll
+C:\Users\CELL STUDIO\Desktop\BeautyAPI\WebApplication1\bin\Release\net8.0\Azure.Storage.Blobs.dll
+C:\Users\CELL STUDIO\Desktop\BeautyAPI\WebApplication1\bin\Release\net8.0\Azure.Storage.Common.dll
+C:\Users\CELL STUDIO\Desktop\BeautyAPI\WebApplication1\bin\Release\net8.0\System.ClientModel.dll
+C:\Users\CELL STUDIO\Desktop\BeautyAPI\WebApplication1\bin\Release\net8.0\System.IO.Hashing.dll

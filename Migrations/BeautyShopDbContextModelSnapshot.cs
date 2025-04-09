@@ -16,7 +16,7 @@ namespace WebApplication1.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.12")
+                .HasAnnotation("ProductVersion", "8.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -183,8 +183,26 @@ namespace WebApplication1.Migrations
                     b.Property<string>("AccountStatus")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("AvailableWorkingHours")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BusinessLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CancellationPolicy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Certifications")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Earnings")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -206,7 +224,13 @@ namespace WebApplication1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PaymentDetails")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PortfolioUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProfilePictureUrl")
@@ -214,6 +238,12 @@ namespace WebApplication1.Migrations
 
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("TravelRadius")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("YearsOfExperience")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -245,37 +275,7 @@ namespace WebApplication1.Migrations
                 {
                     b.HasBaseType("User");
 
-                    b.Property<string>("AvailableWorkingHours")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Bio")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BusinessLocation")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CancellationPolicy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Certifications")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("ClientId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("Earnings")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PaymentDetails")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PortfolioUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("TravelRadius")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("YearsOfExperience")
                         .HasColumnType("int");
 
                     b.HasIndex("ClientId");

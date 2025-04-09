@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
+using WebApplication1.Services; // Ensure this namespace matches where AzureBlobStorageService is defined
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<BeautyShopDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+// ✅ Register the AzureBlobStorageService for dependency injection
+builder.Services.AddSingleton<AzureBlobStorageService>();
 
 // ✅ Configure JWT Authentication
 var secretKey = builder.Configuration["Jwt:SecretKey"];
