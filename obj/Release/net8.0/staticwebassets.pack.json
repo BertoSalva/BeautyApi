@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Dell\\Desktop\\BeautyApi\\wwwroot\\Uploads\\5d78f2e1-2d22-49fb-9705-a648e8fa7f95_DSC07953.png",
+      "PackagePath": "staticwebassets\\Uploads\\5d78f2e1-2d22-49fb-9705-a648e8fa7f95_DSC07953.png"
+    },
+    {
+      "Id": "C:\\Users\\Dell\\Desktop\\BeautyApi\\wwwroot\\Uploads\\5f8b1c7a-394e-4dca-892e-8986d335f86f_logo.jpeg",
+      "PackagePath": "staticwebassets\\Uploads\\5f8b1c7a-394e-4dca-892e-8986d335f86f_logo.jpeg"
+    },
+    {
+      "Id": "C:\\Users\\Dell\\Desktop\\BeautyApi\\wwwroot\\Uploads\\b7e402e3-96d7-46e7-aeba-cc2e0b60e731_DSC07953.png",
+      "PackagePath": "staticwebassets\\Uploads\\b7e402e3-96d7-46e7-aeba-cc2e0b60e731_DSC07953.png"
+    },
+    {
+      "Id": "C:\\Users\\Dell\\Desktop\\BeautyApi\\wwwroot\\Uploads\\f81649c4-f7c4-4452-bac7-306656bd3fb7_0A518D5D-0661-449F-819F-DDCC658B5F3E.JPEG",
+      "PackagePath": "staticwebassets\\Uploads\\f81649c4-f7c4-4452-bac7-306656bd3fb7_0A518D5D-0661-449F-819F-DDCC658B5F3E.JPEG"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.WebApplication1.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.WebApplication1.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.build.WebApplication1.props",
+      "PackagePath": "build\\WebApplication1.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.WebApplication1.props",
+      "PackagePath": "buildMultiTargeting\\WebApplication1.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.buildTransitive.WebApplication1.props",
+      "PackagePath": "buildTransitive\\WebApplication1.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

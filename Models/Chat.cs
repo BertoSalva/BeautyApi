@@ -8,11 +8,11 @@ public class ChatMessage
 
     [ForeignKey("Sender")]
     public int SenderId { get; set; }
-    public User Sender { get; set; }
+    public string Sender { get; set; }
 
     [ForeignKey("Receiver")]
     public int ReceiverId { get; set; }
-    public User Receiver { get; set; }
+    public string Receiver { get; set; }
 
     public string? Message { get; set; }
     public DateTime? Timestamp { get; set; } = DateTime.UtcNow;

@@ -3,17 +3,15 @@ using System.ComponentModel.DataAnnotations;
 
 public class Booking
 {
-    [Key]
     public int Id { get; set; }
+    public int ClientId { get; set; }          // FK to User
+    public int StylistId { get; set; }         // FK to User (barber, nail tech, etc.)
+    public string Service { get; set; }
+    public DateTime Time { get; set; }
+    public string Status { get; set; } = "Pending";
 
-    [ForeignKey("Client")]
-    public int ClientId { get; set; }
-    public Client Client { get; set; }
+    public User Client { get; set; }
+    public User Stylist { get; set; }
+    public int? Rating { get; set; } // ✅ NEW: Rating out of 5
 
-    [ForeignKey("Stylist")]
-    public int StylistId { get; set; }
-    public Stylist Stylist { get; set; }
-
-    public DateTime AppointmentDate { get; set; }
-    public string? Status { get; set; } = "Pending"; // "Confirmed", "Cancelled"
 }

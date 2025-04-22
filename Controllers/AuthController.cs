@@ -17,14 +17,15 @@ namespace WebApplication1.Controllers
     {
         private readonly BeautyShopDbContext _dbContext;
         private readonly IConfiguration _config;
-        private readonly AzureBlobStorageService _blobStorageService;
+        private readonly LocalFileStorageService _fileStorageService;
 
-        public AuthController(BeautyShopDbContext dbContext, IConfiguration config, AzureBlobStorageService blobStorageService)
+        public AuthController(BeautyShopDbContext dbContext, IConfiguration config, LocalFileStorageService fileStorageService)
         {
             _dbContext = dbContext;
             _config = config;
-            _blobStorageService = blobStorageService;
+            _fileStorageService = fileStorageService;
         }
+
 
         // ✅ REGISTER USER WITH EXTENDED ATTRIBUTES AND BLOB SUPPORT
         [HttpPost("register")]
@@ -39,7 +40,7 @@ namespace WebApplication1.Controllers
             string profilePictureUrl = request.ProfilePictureUrl;
             if (request.ProfilePictureFile != null && request.ProfilePictureFile.Length > 0)
             {
-                profilePictureUrl = await _blobStorageService.UploadFileAsync(request.ProfilePictureFile);
+                profilePictureUrl = await _fileStorageService.UploadFileAsync(request.ProfilePictureFile);
             }
 
             var user = new User
@@ -147,7 +148,7 @@ namespace WebApplication1.Controllers
             // Update profile picture: if a file is provided, upload it; otherwise, use the provided URL if any.
             if (updatedUser.ProfilePictureFile != null && updatedUser.ProfilePictureFile.Length > 0)
             {
-                user.ProfilePictureUrl = await _blobStorageService.UploadFileAsync(updatedUser.ProfilePictureFile);
+                user.ProfilePictureUrl = await _fileStorageService.UploadFileAsync(updatedUser.ProfilePictureFile);
             }
             else if (!string.IsNullOrEmpty(updatedUser.ProfilePictureUrl))
             {
@@ -230,9 +231,8 @@ namespace WebApplication1.Controllers
                     u.FullName,
                     u.Email,
                     u.PhoneNumber,
-                    ProfilePictureUrl = string.IsNullOrEmpty(u.ProfilePictureUrl)
-                        ? null
-                        : _blobStorageService.GetBlobSasUriFromUrl(u.ProfilePictureUrl),
+                    ProfilePictureUrl = u.ProfilePictureUrl,
+
                     u.LanguagePreference,
                     u.Location,
                     u.Role,

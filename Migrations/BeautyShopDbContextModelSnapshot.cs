@@ -31,17 +31,25 @@ namespace WebApplication1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("AppointmentDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Service")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StylistId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -60,19 +68,21 @@ namespace WebApplication1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ClientId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Receiver")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ReceiverId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
+                    b.Property<string>("Sender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("StylistId")
+                    b.Property<int>("SenderId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("Timestamp")
@@ -80,44 +90,7 @@ namespace WebApplication1.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SenderId");
-
-                    b.HasIndex("StylistId");
-
                     b.ToTable("ChatMessages");
-                });
-
-            modelBuilder.Entity("Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StylistId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("StylistId");
-
-                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Service", b =>
@@ -139,36 +112,7 @@ namespace WebApplication1.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StylistId");
-
                     b.ToTable("Services");
-                });
-
-            modelBuilder.Entity("Transaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal?>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StylistId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StylistId");
-
-                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("User", b =>
@@ -252,153 +196,23 @@ namespace WebApplication1.Migrations
                     b.UseTpcMappingStrategy();
                 });
 
-            modelBuilder.Entity("Client", b =>
-                {
-                    b.HasBaseType("User");
-
-                    b.Property<int?>("LoyaltyPoints")
-                        .HasColumnType("int");
-
-                    b.Property<string>("NotificationPreferences")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PaymentMethods")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("WalletBalance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.ToTable("Clients");
-                });
-
-            modelBuilder.Entity("Stylist", b =>
-                {
-                    b.HasBaseType("User");
-
-                    b.Property<int?>("ClientId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("ClientId");
-
-                    b.ToTable("Stylists");
-                });
-
             modelBuilder.Entity("Booking", b =>
                 {
-                    b.HasOne("Client", "Client")
-                        .WithMany("BookingHistory")
+                    b.HasOne("User", "Client")
+                        .WithMany()
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Stylist", "Stylist")
-                        .WithMany("BookingRequests")
+                    b.HasOne("User", "Stylist")
+                        .WithMany()
                         .HasForeignKey("StylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Client");
 
                     b.Navigation("Stylist");
-                });
-
-            modelBuilder.Entity("ChatMessage", b =>
-                {
-                    b.HasOne("Client", null)
-                        .WithMany("ChatHistory")
-                        .HasForeignKey("ClientId");
-
-                    b.HasOne("User", "Receiver")
-                        .WithMany()
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("User", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Stylist", null)
-                        .WithMany("ChatHistory")
-                        .HasForeignKey("StylistId");
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("Review", b =>
-                {
-                    b.HasOne("Client", "Client")
-                        .WithMany("ReviewsGiven")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Stylist", "Stylist")
-                        .WithMany("ReviewsReceived")
-                        .HasForeignKey("StylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Stylist");
-                });
-
-            modelBuilder.Entity("Service", b =>
-                {
-                    b.HasOne("Stylist", "Stylist")
-                        .WithMany("ServicesOffered")
-                        .HasForeignKey("StylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Stylist");
-                });
-
-            modelBuilder.Entity("Transaction", b =>
-                {
-                    b.HasOne("Stylist", "Stylist")
-                        .WithMany("Transactions")
-                        .HasForeignKey("StylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Stylist");
-                });
-
-            modelBuilder.Entity("Stylist", b =>
-                {
-                    b.HasOne("Client", null)
-                        .WithMany("FavoriteStylists")
-                        .HasForeignKey("ClientId");
-                });
-
-            modelBuilder.Entity("Client", b =>
-                {
-                    b.Navigation("BookingHistory");
-
-                    b.Navigation("ChatHistory");
-
-                    b.Navigation("FavoriteStylists");
-
-                    b.Navigation("ReviewsGiven");
-                });
-
-            modelBuilder.Entity("Stylist", b =>
-                {
-                    b.Navigation("BookingRequests");
-
-                    b.Navigation("ChatHistory");
-
-                    b.Navigation("ReviewsReceived");
-
-                    b.Navigation("ServicesOffered");
-
-                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

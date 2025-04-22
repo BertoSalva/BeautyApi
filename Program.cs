@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials(); // 🔥 Allow credentials (JWT, cookies)
+            .AllowCredentials(); //  Allow credentials (JWT, cookies)
     });
 });
 
@@ -32,6 +32,8 @@ builder.Services.AddDbContext<BeautyShopDbContext>(options =>
 
 // ✅ Register the AzureBlobStorageService for dependency injection
 builder.Services.AddSingleton<AzureBlobStorageService>();
+builder.Services.AddSingleton<LocalFileStorageService>();
+
 
 // ✅ Configure JWT Authentication
 var secretKey = builder.Configuration["Jwt:SecretKey"];
@@ -59,6 +61,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // ✅ Configure Swagger for API documentation
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<LocalFileStorageService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -102,6 +107,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseStaticFiles();
 
 // ✅ Apply CORS before authentication/authorization
 app.UseCors("AllowReactApp");

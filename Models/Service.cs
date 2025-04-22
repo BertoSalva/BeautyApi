@@ -8,7 +8,7 @@ public class Service
 
     [ForeignKey("Stylist")]
     public int StylistId { get; set; }
-    public Stylist Stylist { get; set; }
+    //public Stylist Stylist { get; set; }
 
     public string? Name { get; set; }
     public decimal? Price { get; set; }
