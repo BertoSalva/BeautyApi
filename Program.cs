@@ -7,7 +7,7 @@ using WebApplication1.Services; // Ensure this namespace matches where AzureBlob
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Add services to the container
+// ✅ Add services to the Amahle was here 2025
 builder.Services.AddControllers();
 
 // ✅ Configure CORS policy for React frontend
