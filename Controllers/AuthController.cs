@@ -246,7 +246,9 @@ namespace WebApplication1.Controllers
                     u.BusinessLocation,
                     u.CancellationPolicy,
                     u.PaymentDetails,
-                    u.Certifications
+                    u.Certifications,
+                    u.Visits,
+                    u.Rating
                 })
                 .FirstOrDefaultAsync();
 
@@ -283,7 +285,9 @@ namespace WebApplication1.Controllers
                     u.BusinessLocation,
                     u.CancellationPolicy,
                     u.PaymentDetails,
-                    u.Certifications
+                    u.Certifications,
+                    u.Rating,
+                    u.Visits
                 })
                 .ToListAsync();
 

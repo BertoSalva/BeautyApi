@@ -29,7 +29,10 @@ public class User
     public decimal? TravelRadius { get; set; }
     public string? BusinessLocation { get; set; }
     public decimal? Earnings { get; set; }
-   
+    public decimal? Rating { get; set; } = 4;
+    public decimal? Visits { get; set; } = 0;
+
+
     public string? CancellationPolicy { get; set; }
     public string? PaymentDetails { get; set; } // e.g., "Bank Account, PayPal"
     public string? Certifications { get; set; }

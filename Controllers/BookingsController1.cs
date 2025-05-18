@@ -8,7 +8,6 @@ namespace WebApplication1.Controllers
     public class BookingsController : ControllerBase
     {
         private readonly BeautyShopDbContext _db;
-
         public BookingsController(BeautyShopDbContext db)
         {
             _db = db;

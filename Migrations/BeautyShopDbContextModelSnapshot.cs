@@ -180,10 +180,16 @@ namespace WebApplication1.Migrations
                     b.Property<string>("ProfilePictureUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal?>("Rating")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("TravelRadius")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Visits")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("YearsOfExperience")
