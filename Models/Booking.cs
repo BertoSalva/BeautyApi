@@ -9,7 +9,6 @@ public class Booking
     public string Service { get; set; }
     public DateTime Time { get; set; }
     public string Status { get; set; } = "Pending";
-    public decimal ServiceCost { get; set; }
 
     public User Client { get; set; }
     public User Stylist { get; set; }

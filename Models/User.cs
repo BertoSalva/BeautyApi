@@ -31,7 +31,7 @@ public class User
     public decimal? Earnings { get; set; }
     public decimal? Rating { get; set; } = 4;
     public decimal? Visits { get; set; } = 0;
-    public decimal? ServiceCost { get; set; }
+
 
     public string? CancellationPolicy { get; set; }
     public string? PaymentDetails { get; set; } // e.g., "Bank Account, PayPal"

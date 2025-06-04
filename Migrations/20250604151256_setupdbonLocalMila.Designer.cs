@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(BeautyShopDbContext))]
-    [Migration("20250519184900_cost")]
-    partial class cost
+    [Migration("20250604151256_setupdbonLocalMila")]
+    partial class setupdbonLocalMila
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -188,9 +188,6 @@ namespace WebApplication1.Migrations
 
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("ServiceCost")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("TravelRadius")
                         .HasColumnType("decimal(18,2)");
