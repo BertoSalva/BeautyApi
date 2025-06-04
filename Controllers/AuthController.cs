@@ -99,7 +99,6 @@ namespace WebApplication1.Controllers
             public string? CancellationPolicy { get; set; }
             public string? PaymentDetails { get; set; }
             public string? Certifications { get; set; }
-            public decimal? ServiceCost { get; set; }
         }
 
         // ✅ LOGIN ENDPOINT (unchanged)
@@ -175,7 +174,6 @@ namespace WebApplication1.Controllers
             user.CancellationPolicy = !string.IsNullOrEmpty(updatedUser.CancellationPolicy) ? updatedUser.CancellationPolicy : user.CancellationPolicy;
             user.PaymentDetails = !string.IsNullOrEmpty(updatedUser.PaymentDetails) ? updatedUser.PaymentDetails : user.PaymentDetails;
             user.Certifications = !string.IsNullOrEmpty(updatedUser.Certifications) ? updatedUser.Certifications : user.Certifications;
-            user.ServiceCost = updatedUser.TravelRadius.HasValue ? updatedUser.ServiceCost : user.ServiceCost;
 
             await _dbContext.SaveChangesAsync();
             return Ok(new { message = "User updated successfully." });
@@ -203,7 +201,6 @@ namespace WebApplication1.Controllers
             public string? CancellationPolicy { get; set; }
             public string? PaymentDetails { get; set; }
             public string? Certifications { get; set; }
-            public decimal? ServiceCost { get; set; }
         }
 
         // ✅ DELETE USER BY ID
@@ -251,8 +248,7 @@ namespace WebApplication1.Controllers
                     u.PaymentDetails,
                     u.Certifications,
                     u.Visits,
-                    u.Rating,
-                    u.ServiceCost
+                    u.Rating
                 })
                 .FirstOrDefaultAsync();
 
@@ -291,8 +287,7 @@ namespace WebApplication1.Controllers
                     u.PaymentDetails,
                     u.Certifications,
                     u.Rating,
-                    u.Visits,
-                    u.ServiceCost
+                    u.Visits
                 })
                 .ToListAsync();
 
