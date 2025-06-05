@@ -54,7 +54,56 @@ namespace WebApplication1.Controllers
             {
                 return BadRequest(new { message = "There was an errors while trying to fetch invoices. Error: ** " + e });
             }
+        }
 
+
+        [HttpGet("getInvoice/{Id}")]
+        public async Task<IActionResult> GetInvoiceById(int Id)
+        {
+            if (_db is null)
+            {
+                return NotFound(new { message = "Faild to find Database to execute" });
+            }
+
+            try
+            {
+                var Invoice = await _db.Invoices
+                  .Where(x => x.Id == Id)
+                  .Include(x => x.InvoiceItems)
+                  .SingleOrDefaultAsync(x => x.Id == Id);
+
+
+                if (Invoice == null)
+                {
+                    return NotFound(new { message = $"Invoice with Id {Id} not found." });
+                }
+
+                return Ok(new
+                {
+                    Invoice = new
+                    {
+                        Invoice.Id,
+                        Invoice.InvoiceNumber,
+                        Invoice.InvoiceDate,
+                        Invoice.Total,
+                        Invoice.Description,
+                        Invoice.IsPaid,
+                        Items = Invoice.InvoiceItems.Select(item => new
+                        {
+                            item.Id,
+                            item.Name,
+                            item.Quantity,
+                            item.Price,
+                            item.Description,
+                            item.CreatedDate
+                        })
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = "There was an errors while trying to fetch invoices. Error: ** " + e });
+            }
         }
 
         [HttpPost("addInvoice")]
