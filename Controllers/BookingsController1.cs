@@ -32,8 +32,7 @@ namespace WebApplication1.Controllers
                 StylistId = request.StylistId,
                 Service = request.Service,
                 Time = request.Time,
-                Status = "Pending",
-                ServiceCost = request.ServiceCost
+                Status = "Pending"
             };
 
             _db.Bookings.Add(booking);
@@ -57,8 +56,7 @@ namespace WebApplication1.Controllers
                 b.Time,
                 b.Status,
                 ClientName = b.Client.FullName,
-                ClientEmail = b.Client.Email,
-                b.ServiceCost
+                ClientEmail = b.Client.Email
             }));
         }
         [HttpPut("status/{id}")]
@@ -105,8 +103,7 @@ namespace WebApplication1.Controllers
                 b.Time,
                 b.Status,
                 StylistName = b.Stylist.FullName,
-                StylistRole = b.Stylist.Role,
-                b.ServiceCost 
+                StylistRole = b.Stylist.Role
             }));
         }
 
@@ -117,7 +114,6 @@ namespace WebApplication1.Controllers
             public int StylistId { get; set; }
             public string Service { get; set; }
             public DateTime Time { get; set; }
-            public decimal ServiceCost { get; set; }
         }
     }
 }

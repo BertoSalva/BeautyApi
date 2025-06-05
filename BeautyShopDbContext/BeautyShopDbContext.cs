@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using WebApplication1.Models;
 
 public class BeautyShopDbContext : DbContext
 {
@@ -14,6 +15,8 @@ public class BeautyShopDbContext : DbContext
     //public DbSet<Review> Reviews { get; set; }
     //public DbSet<Transaction> Transactions { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
+    public DbSet<Invoice> Invoices { get; set; }
+    public DbSet<InvoiceItem> InvoiceItem { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,6 +36,12 @@ public class BeautyShopDbContext : DbContext
             .WithMany()
             .HasForeignKey(b => b.StylistId)
             .OnDelete(DeleteBehavior.NoAction); // Prevent multiple cascade paths
+
+        modelBuilder.Entity<Invoice>()
+            .HasMany(i => i.InvoiceItems)
+            .WithOne(ii => ii.Invoice)
+            .HasForeignKey(ii => ii.InvoiceId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
 }

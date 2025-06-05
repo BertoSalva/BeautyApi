@@ -2,6 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/WebApplication1
 /bin/Debug/net8.0
+/.vs/WebApplication1
+/obj/Debug/net8.0
 /obj
