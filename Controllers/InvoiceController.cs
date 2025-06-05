@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.DTOModels;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -18,9 +19,9 @@ namespace WebApplication1.Controllers
         [HttpGet("getVendorInvoices/{vendorUserId}")]
         public async Task<IActionResult> GetInvoicesByVendo(int vendorUserId)
         {
-            if(_db is null)
+            if (_db is null)
             {
-                return NotFound( new {message = "Faild to find Database to execute"});
+                return NotFound(new { message = "Faild to find Database to execute" });
             }
 
             try
@@ -51,9 +52,9 @@ namespace WebApplication1.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(new { message = "There was an errors while trying to fetch invoices. Error: ** " + e});
+                return BadRequest(new { message = "There was an errors while trying to fetch invoices. Error: ** " + e });
             }
-          
+
         }
 
         [HttpPost("addInvoice")]
@@ -77,7 +78,7 @@ namespace WebApplication1.Controllers
             try
             {
                 var addItems = await AddInvoiceItems(request);
-                if(addItems is OkObjectResult)
+                if (addItems is OkObjectResult)
                 {
                     try
                     {
@@ -119,7 +120,7 @@ namespace WebApplication1.Controllers
             _db.InvoiceItem.AddRange(items);
             await _db.SaveChangesAsync();
 
-            return Ok(new { message = "Invoice items added successfully."});
+            return Ok(new { message = "Invoice items added successfully." });
         }
 
 
@@ -146,6 +147,85 @@ namespace WebApplication1.Controllers
             await _db.SaveChangesAsync();
 
             return Ok(new { message = "Invoice items added successfully." });
+        }
+
+        //Update Statement
+        [HttpPut("updateInvoice/{id}")]
+        public async Task<IActionResult> UpdateInvoice(int id, [FromBody] InvoiceDTO request)
+        {
+            var invoice = await _db.Invoices.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+            if (invoice == null)
+                return NotFound(new { message = "Invoice not found." });
+
+            invoice.InvoiceDate = request.InvoiceDate;
+            invoice.Total = request.Total;
+            invoice.Description = request.Description;
+            invoice.IsPaid = request.IsPaid;
+
+            try
+            {
+                _db.Invoices.Update(invoice);
+                await _db.SaveChangesAsync();
+                return Ok(new { message = "Invoice updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to update invoice.", error = ex.Message });
+            }
+        }
+
+        [HttpPut("updateInvoiceItem/{id}")]
+        public async Task<IActionResult> UpdateInvoiceItem(int id, [FromBody] InvoiceItem request)
+        {
+            var item = await _db.InvoiceItem.FindAsync(id);
+            if (item == null)
+                return NotFound(new { message = "Invoice item not found." });
+
+            item.Name = request.Name;
+            item.Quantity = request.Quantity;
+            item.Price = request.Price;
+            item.Description = request.Description;
+
+            try
+            {
+                _db.InvoiceItem.Update(item);
+                await _db.SaveChangesAsync();
+                return Ok(new { message = "Invoice item updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to update invoice item.", error = ex.Message });
+            }
+        }
+
+        [HttpDelete("deleteInvoice/{id}")]
+        public async Task<IActionResult> DeleteInvoice(int id)
+        {
+            var invoice = await _db.Invoices
+                .Include(i => i.InvoiceItems)
+                .FirstOrDefaultAsync(i => i.Id == id);
+
+            if (invoice == null)
+                return NotFound(new { message = "Invoice not found." });
+
+            try
+            {
+                // Manually remove related invoice items if cascade delete is not configured
+                if (invoice.InvoiceItems != null && invoice.InvoiceItems.Any())
+                {
+                    _db.InvoiceItem.RemoveRange(invoice.InvoiceItems);
+                }
+
+                _db.Invoices.Remove(invoice);
+                await _db.SaveChangesAsync();
+
+                return Ok(new { message = "Invoice and related items deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to delete invoice.", error = ex.Message });
+            }
         }
 
     }
