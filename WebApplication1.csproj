@@ -28,6 +28,7 @@
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.0.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.0" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.3" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.0" />
 
 		<!-- Swagger for API Documentation -->
@@ -35,8 +36,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Enums\" />
-	  <Folder Include="wwwroot\wwwroot\Uploads\" />
+		<Folder Include="wwwroot\wwwroot\Uploads\" />
 	</ItemGroup>
 
 </Project>

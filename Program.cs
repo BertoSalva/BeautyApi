@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
@@ -24,11 +25,11 @@ builder.Services.AddCors(options =>
             .AllowCredentials(); //  Allow credentials (JWT, cookies)
     });
 });
-
-// ✅ Configure Entity Framework Core with SQL Server
 builder.Services.AddDbContext<BeautyShopDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+
 
 // ✅ Register the AzureBlobStorageService for dependency injection
 builder.Services.AddSingleton<AzureBlobStorageService>();
