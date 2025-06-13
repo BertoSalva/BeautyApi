@@ -39,6 +39,7 @@ namespace WebApplication1.Controllers
                     x.Total,
                     x.Description,
                     x.IsPaid,
+                    x.UserId,
                     Items = x.InvoiceItems.Select(item => new
                     {
                         item.Id,
@@ -88,6 +89,7 @@ namespace WebApplication1.Controllers
                         Invoice.Total,
                         Invoice.Description,
                         Invoice.IsPaid,
+                        Invoice.UserId,
                         Items = Invoice.InvoiceItems.Select(item => new
                         {
                             item.Id,
@@ -96,7 +98,7 @@ namespace WebApplication1.Controllers
                             item.Price,
                             item.Description,
                             item.CreatedDate
-                        })
+                        }),
                     }
                 });
             }
