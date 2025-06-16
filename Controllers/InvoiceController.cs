@@ -109,7 +109,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost("addInvoice")]
-        public async Task<IActionResult> AddInvoice([FromBody] Invoice request)
+        public async Task<IActionResult> AddInvoice([FromBody] InvoiceDTO request)
         {
             var vendor = await _db.Users.FindAsync(request.UserId);
 
@@ -151,16 +151,16 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost("addInvoiceItemsRelated")]
-        public async Task<IActionResult> AddInvoiceItems([FromBody] Invoice request)
+        public async Task<IActionResult> AddInvoiceItems([FromBody] InvoiceDTO request)
         {
-            var invoice = await _db.Invoices.FindAsync(request.Id);
+            var invoice = await _db.Invoices.FindAsync(request.InvoiceNumber);
 
             if (invoice == null)
                 return NotFound(new { message = "Invoice not found." });
 
             var items = request.InvoiceItems.Select(item => new InvoiceItem
             {
-                InvoiceId = request.Id,
+                InvoiceId = Convert.ToInt32(request.InvoiceNumber),
                 Name = item.Name,
                 Quantity = item.Quantity,
                 Price = item.Price,
