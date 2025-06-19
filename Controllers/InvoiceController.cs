@@ -112,6 +112,10 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> AddInvoice([FromBody] InvoiceDTO request)
         {
             var vendor = await _db.Users.FindAsync(request.UserId);
+            
+            int invoiceCount = _db.Invoices.Count();
+            int x = invoiceCount + 1;
+            string invoiceNum = "INV"+x.ToString("D4");
 
             if (vendor == null)
                 return BadRequest(new { message = "Vendor or customer not found." });
@@ -119,8 +123,8 @@ namespace WebApplication1.Controllers
             var invoice = new Invoice
             {
                 UserId = request.UserId,
-                InvoiceNumber = request.InvoiceNumber,
-                InvoiceDate = request.InvoiceDate,
+                InvoiceNumber = invoiceNum,
+                InvoiceDate = DateTime.UtcNow,
                 Total = request.Total,
                 Description = request.Description,
                 IsPaid = false
@@ -128,44 +132,66 @@ namespace WebApplication1.Controllers
 
             try
             {
-                var addItems = await AddInvoiceItems(request);
+                _db.Invoices.Add(invoice);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = $"Failed to save invoice. {e}", InvoiceId = invoice.Id });
+            }
+
+            try
+            {
+                var addItems = await AddInvoiceItemsRelated(request, invoiceNum);
                 if (addItems is OkObjectResult)
                 {
                     try
                     {
-                        _db.Invoices.Add(invoice);
+                        
                         await _db.SaveChangesAsync();
+                        return Ok(new { message = "Invoice created successfully.", InvoiceId = invoice.Id });
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        return Ok(new { message = "Failed to save invoice.", InvoiceId = invoice.Id });
+                        return BadRequest(new { message = $"Failed to save invoice items. {e}", InvoiceId = invoice.Id });
                     }
                 }
+                else
+                {
+                    return BadRequest(new { message = "Could not find invoice items to add to invoice.", InvoiceId = invoice.Id });
+                }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return Ok(new { message = "Failed to create invoice.", InvoiceId = invoice.Id });
-            }
+                //remove the invoice if failed to add its items.
+                var exiinvoice = await _db.Invoices.Where(x => x.InvoiceNumber == invoiceNum).FirstOrDefaultAsync();
 
-            return Ok(new { message = "Invoice created successfully.", InvoiceId = invoice.Id });
+                if(exiinvoice is not null)
+                {
+                    _db.Invoices.Remove(exiinvoice);
+                    await _db.SaveChangesAsync();
+                }
+               
+                return BadRequest(new { message = $"Failed to add new invoice. {e}", InvoiceId = invoice.Id });
+            }
         }
 
         [HttpPost("addInvoiceItemsRelated")]
-        public async Task<IActionResult> AddInvoiceItems([FromBody] InvoiceDTO request)
+        public async Task<IActionResult> AddInvoiceItemsRelated([FromBody] InvoiceDTO request, string invoiceNum)
         {
-            var invoice = await _db.Invoices.FindAsync(request.InvoiceNumber);
+            var invoice = await _db.Invoices.Where(x => x.InvoiceNumber == invoiceNum).FirstOrDefaultAsync();
 
             if (invoice == null)
                 return NotFound(new { message = "Invoice not found." });
 
             var items = request.InvoiceItems.Select(item => new InvoiceItem
             {
-                InvoiceId = Convert.ToInt32(request.InvoiceNumber),
+                InvoiceId = invoice.Id,
                 Name = item.Name,
                 Quantity = item.Quantity,
                 Price = item.Price,
-                Description = item.Description,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow,
+                Description = item.Description
             }).ToList();
 
             _db.InvoiceItem.AddRange(items);
