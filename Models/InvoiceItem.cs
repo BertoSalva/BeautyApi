@@ -16,11 +16,10 @@ namespace WebApplication1.Models
         [Required]
         public decimal Price { get; set; }
 
-        [Required]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Required]
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         [Required]
         public int InvoiceId { get; set; }
