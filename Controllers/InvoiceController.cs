@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.DTOModels;
+using WebApplication1.InvoicePdfService;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -11,9 +12,11 @@ namespace WebApplication1.Controllers
     public class InvoiceController : Controller
     {
         private readonly BeautyShopDbContext _db;
-        public InvoiceController(BeautyShopDbContext db)
+        private readonly InvoicePDFService _invoiceService;
+        public InvoiceController(BeautyShopDbContext db, InvoicePDFService invoicePDFService)
         {
             _db = db;
+            _invoiceService = invoicePDFService;
         }
 
         [HttpGet("getVendorInvoices/{vendorUserId}")]
@@ -26,30 +29,50 @@ namespace WebApplication1.Controllers
 
             try
             {
-                var Invoices = await _db.Invoices
-                  .Where(x => x.UserId == vendorUserId)
-                  .Include(x => x.InvoiceItems)
-                  .ToListAsync();
+                var user = await _db.Users.FindAsync(vendorUserId);
+                List<Invoice> invoices = new();
 
-                return Ok(Invoices.Select(x => new
+                if (user is not null)
                 {
-                    x.Id,
-                    x.InvoiceNumber,
-                    x.InvoiceDate,
-                    x.Total,
-                    x.Description,
-                    x.IsPaid,
-                    x.UserId,
-                    Items = x.InvoiceItems.Select(item => new
+                    if(user.Role != "Client")
                     {
-                        item.Id,
-                        item.Name,
-                        item.Quantity,
-                        item.Price,
-                        item.Description,
-                        item.CreatedDate
-                    })
-                }));
+                         invoices = await _db.Invoices
+                         .Where(x => x.VendorId == vendorUserId)
+                         .Include(x => x.InvoiceItems)
+                         .ToListAsync();
+                    }
+                    else
+                    {
+                        invoices = await _db.Invoices
+                         .Where(x => x.UserId == vendorUserId)
+                         .Include(x => x.InvoiceItems)
+                         .ToListAsync();
+                    }
+
+                        return Ok(invoices.Select(x => new
+                        {
+                            x.Id,
+                            x.InvoiceNumber,
+                            x.InvoiceDate,
+                            x.Total,
+                            x.Description,
+                            x.IsPaid,
+                            x.UserId,
+                            Items = x.InvoiceItems?.Select(item => new
+                            {
+                                item.Id,
+                                item.Name,
+                                item.Quantity,
+                                item.Price,
+                                item.Description,
+                                item.CreatedDate
+                            })
+                        }));
+                }
+                else
+                {
+                    return BadRequest(new { message = "User not found!"});
+                }
             }
             catch (Exception e)
             {
@@ -127,6 +150,7 @@ namespace WebApplication1.Controllers
                 InvoiceDate = DateTime.UtcNow,
                 Total = request.Total,
                 Description = request.Description,
+                VendorId = request.VendorId,
                 IsPaid = false
             };
 
@@ -174,6 +198,31 @@ namespace WebApplication1.Controllers
                
                 return BadRequest(new { message = $"Failed to add new invoice. {e}", InvoiceId = invoice.Id });
             }
+        }
+
+        [HttpPost]
+        [Route("generateInvoice")]
+        public async Task<IActionResult> GenerateInvoice(string invoiceNumber, int invoiceId, int clientId)
+        {
+            var fileName = _invoiceService.GenerateInvoicePdf(invoiceNumber.ToUpper(), invoiceId, clientId);
+            return Ok(new { Message = "Invoice generated", FileName = fileName });
+        }
+
+        [HttpGet]
+        [Route("downloadInvoice/{invoiceNumber}")]
+        public async Task<IActionResult> DownloadInvoice(string invoiceNumber)
+        {
+            string invoicesFolder = Path.Combine("BeautyShop_Invoices");
+            string fileName = $"MyBeautyShop - {invoiceNumber.Trim()}.pdf";
+            string filePath = Path.Combine(invoicesFolder, fileName);
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound(new { Message = $"Invoice not found. {filePath}" });
+            }
+
+            byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+            return File(fileBytes, "application/pdf", fileName);
         }
 
         [HttpPost("addInvoiceItemsRelated")]

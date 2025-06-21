@@ -4,12 +4,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
-using WebApplication1.Services; // Ensure this namespace matches where AzureBlobStorageService is defined
+using WebApplication1.InvoicePdfService;
+using WebApplication1.Services;
+using WebApplication1.SmtpMail;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ✅ Add services to the Amahle was here 2025
 builder.Services.AddControllers();
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<InvoicePDFService>();
 
 // ✅ Configure CORS policy for React frontend
 builder.Services.AddCors(options =>

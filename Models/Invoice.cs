@@ -21,11 +21,15 @@ namespace WebApplication1.Models
 
         public bool IsPaid { get; set; }
 
+        [Required]
+        public int VendorId { get; set; }
+
         //FK Relationships
         [Required]
         public int UserId { get; set; }
-        public User User { get; set; }
 
-        public ICollection<InvoiceItem> InvoiceItems { get; set; }
+        public User? User { get; set; }
+
+        public ICollection<InvoiceItem>? InvoiceItems { get; set; }
     }
 }
