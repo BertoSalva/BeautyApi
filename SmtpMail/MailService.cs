@@ -27,7 +27,7 @@ namespace WebApplication1.SmtpMail
             email.Body = new TextPart(TextFormat.Html) { Text = mailRequest.Body }; 
 
             using var smtp = new SmtpClient();
-            await smtp.ConnectAsync(_mailSettings.SmtpHost, _mailSettings.SmtpPort, SecureSocketOptions.None);
+            await smtp.ConnectAsync(_mailSettings.SmtpHost, _mailSettings.SmtpPort, SecureSocketOptions.SslOnConnect);
             await smtp.AuthenticateAsync(_mailSettings.SmtpUser, _mailSettings.SmtpPass);
             await smtp.SendAsync(email);
             await smtp.DisconnectAsync(true);
