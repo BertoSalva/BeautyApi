@@ -73,7 +73,14 @@ namespace WebApplication1.Controllers
                 }
             };
 
-            await _mailService.SendEmailAsync(request);
+            try
+            {
+                await _mailService.SendEmailAsync(request);
+            }
+            catch (Exception ex)
+            {           
+                return StatusCode(500, new { message = "Failed to send email." });
+            }
             return Ok(new { message = "Invoice email sent." });
         }
     }
