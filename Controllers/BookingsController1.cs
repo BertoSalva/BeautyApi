@@ -58,6 +58,7 @@ namespace WebApplication1.Controllers
                 b.Status,
                 ClientName = b.Client.FullName,
                 ClientEmail = b.Client.Email,
+                ClientId = b.Client.Id,
                 b.ServiceCost
             }));
         }
