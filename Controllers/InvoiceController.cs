@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.DTOModels;
+using WebApplication1.InvoicePdfService;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -11,9 +12,11 @@ namespace WebApplication1.Controllers
     public class InvoiceController : Controller
     {
         private readonly BeautyShopDbContext _db;
-        public InvoiceController(BeautyShopDbContext db)
+        private readonly InvoicePDFService _invoiceService;
+        public InvoiceController(BeautyShopDbContext db, InvoicePDFService invoicePDFService)
         {
             _db = db;
+            _invoiceService = invoicePDFService;
         }
 
         [HttpGet("getVendorInvoices/{vendorUserId}")]
@@ -26,29 +29,50 @@ namespace WebApplication1.Controllers
 
             try
             {
-                var Invoices = await _db.Invoices
-                  .Where(x => x.UserId == vendorUserId)
-                  .Include(x => x.InvoiceItems)
-                  .ToListAsync();
+                var user = await _db.Users.FindAsync(vendorUserId);
+                List<Invoice> invoices = new();
 
-                return Ok(Invoices.Select(x => new
+                if (user is not null)
                 {
-                    x.Id,
-                    x.InvoiceNumber,
-                    x.InvoiceDate,
-                    x.Total,
-                    x.Description,
-                    x.IsPaid,
-                    Items = x.InvoiceItems.Select(item => new
+                    if(user.Role != "Client")
                     {
-                        item.Id,
-                        item.Name,
-                        item.Quantity,
-                        item.Price,
-                        item.Description,
-                        item.CreatedDate
-                    })
-                }));
+                         invoices = await _db.Invoices
+                         .Where(x => x.VendorId == vendorUserId)
+                         .Include(x => x.InvoiceItems)
+                         .ToListAsync();
+                    }
+                    else
+                    {
+                        invoices = await _db.Invoices
+                         .Where(x => x.UserId == vendorUserId)
+                         .Include(x => x.InvoiceItems)
+                         .ToListAsync();
+                    }
+
+                        return Ok(invoices.Select(x => new
+                        {
+                            x.Id,
+                            x.InvoiceNumber,
+                            x.InvoiceDate,
+                            x.Total,
+                            x.Description,
+                            x.IsPaid,
+                            x.UserId,
+                            Items = x.InvoiceItems?.Select(item => new
+                            {
+                                item.Id,
+                                item.Name,
+                                item.Quantity,
+                                item.Price,
+                                item.Description,
+                                item.CreatedDate
+                            })
+                        }));
+                }
+                else
+                {
+                    return BadRequest(new { message = "User not found!"});
+                }
             }
             catch (Exception e)
             {
@@ -88,6 +112,7 @@ namespace WebApplication1.Controllers
                         Invoice.Total,
                         Invoice.Description,
                         Invoice.IsPaid,
+                        Invoice.UserId,
                         Items = Invoice.InvoiceItems.Select(item => new
                         {
                             item.Id,
@@ -96,7 +121,7 @@ namespace WebApplication1.Controllers
                             item.Price,
                             item.Description,
                             item.CreatedDate
-                        })
+                        }),
                     }
                 });
             }
@@ -107,9 +132,13 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost("addInvoice")]
-        public async Task<IActionResult> AddInvoice([FromBody] Invoice request)
+        public async Task<IActionResult> AddInvoice([FromBody] InvoiceDTO request)
         {
             var vendor = await _db.Users.FindAsync(request.UserId);
+            
+            int invoiceCount = _db.Invoices.Count();
+            int x = invoiceCount + 1;
+            string invoiceNum = "INV"+x.ToString("D4");
 
             if (vendor == null)
                 return BadRequest(new { message = "Vendor or customer not found." });
@@ -117,53 +146,101 @@ namespace WebApplication1.Controllers
             var invoice = new Invoice
             {
                 UserId = request.UserId,
-                InvoiceNumber = request.InvoiceNumber,
-                InvoiceDate = request.InvoiceDate,
+                InvoiceNumber = invoiceNum,
+                InvoiceDate = DateTime.UtcNow,
                 Total = request.Total,
                 Description = request.Description,
+                VendorId = request.VendorId,
                 IsPaid = false
             };
 
             try
             {
-                var addItems = await AddInvoiceItems(request);
+                _db.Invoices.Add(invoice);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = $"Failed to save invoice. {e}", InvoiceId = invoice.Id });
+            }
+
+            try
+            {
+                var addItems = await AddInvoiceItemsRelated(request, invoiceNum);
                 if (addItems is OkObjectResult)
                 {
                     try
                     {
-                        _db.Invoices.Add(invoice);
+                        
                         await _db.SaveChangesAsync();
+                        return Ok(new { message = "Invoice created successfully.", InvoiceId = invoice.Id });
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        return Ok(new { message = "Failed to save invoice.", InvoiceId = invoice.Id });
+                        return BadRequest(new { message = $"Failed to save invoice items. {e}", InvoiceId = invoice.Id });
                     }
                 }
+                else
+                {
+                    return BadRequest(new { message = "Could not find invoice items to add to invoice.", InvoiceId = invoice.Id });
+                }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return Ok(new { message = "Failed to create invoice.", InvoiceId = invoice.Id });
+                //remove the invoice if failed to add its items.
+                var exiinvoice = await _db.Invoices.Where(x => x.InvoiceNumber == invoiceNum).FirstOrDefaultAsync();
+
+                if(exiinvoice is not null)
+                {
+                    _db.Invoices.Remove(exiinvoice);
+                    await _db.SaveChangesAsync();
+                }
+               
+                return BadRequest(new { message = $"Failed to add new invoice. {e}", InvoiceId = invoice.Id });
+            }
+        }
+
+        [HttpPost]
+        [Route("generateInvoice")]
+        public async Task<IActionResult> GenerateInvoice(string invoiceNumber, int invoiceId, int clientId)
+        {
+            var fileName = _invoiceService.GenerateInvoicePdf(invoiceNumber.ToUpper(), invoiceId, clientId);
+            return Ok(new { Message = "Invoice generated", FileName = fileName });
+        }
+
+        [HttpGet]
+        [Route("downloadInvoice/{invoiceNumber}")]
+        public async Task<IActionResult> DownloadInvoice(string invoiceNumber)
+        {
+            string invoicesFolder = Path.Combine("BeautyShop_Invoices");
+            string fileName = $"MyBeautyShop - {invoiceNumber.Trim()}.pdf";
+            string filePath = Path.Combine(invoicesFolder, fileName);
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound(new { Message = $"Invoice not found. {filePath}" });
             }
 
-            return Ok(new { message = "Invoice created successfully.", InvoiceId = invoice.Id });
+            byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+            return File(fileBytes, "application/pdf", fileName);
         }
 
         [HttpPost("addInvoiceItemsRelated")]
-        public async Task<IActionResult> AddInvoiceItems([FromBody] Invoice request)
+        public async Task<IActionResult> AddInvoiceItemsRelated([FromBody] InvoiceDTO request, string invoiceNum)
         {
-            var invoice = await _db.Invoices.FindAsync(request.Id);
+            var invoice = await _db.Invoices.Where(x => x.InvoiceNumber == invoiceNum).FirstOrDefaultAsync();
 
             if (invoice == null)
                 return NotFound(new { message = "Invoice not found." });
 
             var items = request.InvoiceItems.Select(item => new InvoiceItem
             {
-                InvoiceId = request.Id,
+                InvoiceId = invoice.Id,
                 Name = item.Name,
                 Quantity = item.Quantity,
                 Price = item.Price,
-                Description = item.Description,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow,
+                Description = item.Description
             }).ToList();
 
             _db.InvoiceItem.AddRange(items);

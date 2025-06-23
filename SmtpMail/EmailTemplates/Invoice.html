@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Beauty Shop</title>
+</head>
+<body style="overflow-x: hidden; background-color: #f273f2; font-family: Sans-Serif; color: black;">
+    <div style="position: relative;
+            top: 5%;
+            box-shadow: 0px 0px 15px rgba(0,0,20,1);
+            width: 65vw;
+            background-color: white;
+            padding: 24px;
+            margin: auto;">
+        <div style="background-color: black; width: 100%">
+            <img src="http://localhost:5173/src/assets/images/logoB.png" width="100px" alt"Logo"
+                 style="display: flex; margin: auto; text-align: center; padding: 0px; background-color: black;" />
+        </div>
+
+        <h3 style="padding: 0px;"><b>INV #{{InvoiceNumber}}</b></h3>
+
+        <P><b>Dear  {{Recipient}} </b></P>
+        <hr />
+
+        <p style="font-size: 13px; margin: auto;">
+            We appreciate your business. Please find your invoice details here. Feel free to contact us if you have any questions.
+        </p>
+
+        <br />
+        <p style="font-size: 13px; color: grey; margin: auto; text-align: center;"><b>INVOICE DETAILS #{{InvoiceNumber}}</b></p>
+
+        <div style="margin: auto; width: 100%; text-align: center;">
+            <div style="margin: auto;">
+                <p style="font-size: 13px;"><b>Due: {{DueDate}}</b></p>
+                <h1><b>R {{Total}}</b></h1>
+            </div>
+        </div>
+        <p style="font-size: 12px; width: 100%; text-align: center;">
+            <a target="_blank" href="{{InvoiceLink}}" style="background-color: #f273f2; color: white; border-style: solid; border-color: #f273f2; border-radius:15%; padding: 5px; text-decoration: none;">
+                Download Invoice
+            </a>
+        </p>
+        <br />
+        <p style="font-size: 13px;">
+            Thank you for your support, we appreciate the business, please find the attached invoice below.
+            We hope you have a wonderful day. Let us know if you need any help;
+            email <a href="mailto:info@mybeautyshop.co.za">info@mybeautyshop.co.za</a>
+        </p>
+        <hr />
+
+        <!--Footer-->
+        <p style="font-size: 13px;">
+            Kind Regards<br />
+            <b>My Beauty Shop</b><br>
+        </p>
+
+        <p style="font-size: 12px;">
+            <b>P:</b> (+27) 12-345-6789 <br />
+            <b>E:</b> info@mybeautyshop.co.za
+        </p><br />
+
+        <p style="font-size:12px; text-align: center;">
+            Copyright&copy; {{Year}} My Beauty Shop.
+        </p>
+    </div>
+</body>
+</html>

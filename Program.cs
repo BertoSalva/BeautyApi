@@ -1,10 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
+using WebApplication1.InvoicePdfService;
 using WebApplication1.Services;
+using WebApplication1.SmtpMail;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddControllers();
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<InvoicePDFService>();
+
+// ✅ Configure CORS policy for React frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
