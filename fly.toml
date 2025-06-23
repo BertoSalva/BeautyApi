@@ -1,0 +1,34 @@
+# fly.toml app configuration file generated for beautyshop-api on 2025-06-15T17:09:42+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'beautyshop-api'
+primary_region = 'jnb'
+
+[build]
+  dockerfile = 'Dockerfile_WebApplication1'
+
+[env]
+  ASPNETCORE_URLS = 'http://+:8080'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 8080
+
+  [[services.ports]]
+    port = 80
+    handlers = ['http']
+
+  [[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
+
+  [services.concurrency]
+    hard_limit = 50
+    soft_limit = 25
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
